@@ -57,7 +57,8 @@ const HomeworkCapture = ({ userBalance, onBalanceUpdate, onStarsEarned }: Homewo
   const sampleResponses = {
     hint: {
       text: "💡 **Quick Hint**: This is a quadratic equation! Try using the quadratic formula: x = (-b ± √(b²-4ac)) / 2a. Remember: a=1, b=-5, c=6",
-      timeEstimate: "30 seconds"
+      timeEstimate: "30 seconds",
+      starsEarned: undefined
     },
     walkthrough: {
       text: `📚 **Complete Solution**:
@@ -80,7 +81,8 @@ x₁ = (5 + 1) / 2 = 3
 x₂ = (5 - 1) / 2 = 2
 
 **Answer**: x = 2 or x = 3 ✅`,
-      timeEstimate: "2 minutes"
+      timeEstimate: "2 minutes",
+      starsEarned: undefined
     },
     practice: {
       text: `🎯 **Complete Solution + Practice**:
