@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useUserData } from "@/hooks/useUserData";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,11 +22,15 @@ interface AIResponse {
 }
 
 const HomeworkCapture = ({ userBalance, onBalanceUpdate, onStarsEarned }: HomeworkCaptureProps) => {
+  const { wallet, saveHomeworkSession, updateWalletBalance, addTransaction } = useUserData();
   const [question, setQuestion] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [aiResponse, setAiResponse] = useState<AIResponse | null>(null);
   const [selectedTier, setSelectedTier] = useState<string>("");
+
+  // Use wallet data from hook instead of props
+  const currentBalance = wallet?.balance || 0;
 
   const questionTiers = [
     {
@@ -119,7 +124,7 @@ x₂ = (5 - 1) / 2 = 2
     const selectedTierData = questionTiers.find(t => t.id === tier);
     if (!selectedTierData) return;
 
-    if (userBalance < selectedTierData.price) {
+    if (currentBalance < selectedTierData.price) {
       toast.error("Insufficient balance. Please top up your wallet.");
       return;
     }
@@ -128,19 +133,39 @@ x₂ = (5 - 1) / 2 = 2
     setSelectedTier(tier);
 
     // Simulate AI processing
-    setTimeout(() => {
+    setTimeout(async () => {
       const response = sampleResponses[tier as keyof typeof sampleResponses];
       setAiResponse({ ...response, tier });
       
-      onBalanceUpdate(userBalance - selectedTierData.price);
+      const newBalance = currentBalance - selectedTierData.price;
+      const starsEarned = response.starsEarned || 0;
       
-      if (response.starsEarned) {
-        onStarsEarned(response.starsEarned);
-        toast.success(`Amazing! You earned ${response.starsEarned} Family Stars! 🌟`);
+      // Update wallet in database
+      await updateWalletBalance(newBalance, starsEarned);
+      
+      // Add transaction record
+      await addTransaction(
+        -selectedTierData.price,
+        'payment',
+        `${selectedTierData.name} - Homework help`
+      );
+      
+      // Save homework session
+      await saveHomeworkSession(
+        question || 'Image uploaded',
+        tier,
+        response.text,
+        starsEarned,
+        selectedTierData.price,
+        imageFile ? 'uploaded_image' : undefined
+      );
+      
+      if (starsEarned > 0) {
+        toast.success(`Amazing! You earned ${starsEarned} Family Stars! 🌟`);
       }
       
       setIsProcessing(false);
-      toast.success(`Answer generated! Balance: R${(userBalance - selectedTierData.price).toFixed(2)}`);
+      toast.success(`Answer generated! New balance: R${newBalance.toFixed(2)}`);
     }, 2000);
   };
 
@@ -157,7 +182,7 @@ x₂ = (5 - 1) / 2 = 2
         <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">Ask Askie Anything!</h1>
         <p className="text-gray-600">Snap a photo or type your homework question</p>
         <Badge variant="outline" className="mt-2">
-          Balance: R{userBalance.toFixed(2)}
+          Balance: R{currentBalance.toFixed(2)}
         </Badge>
       </div>
 
@@ -219,8 +244,8 @@ x₂ = (5 - 1) / 2 = 2
                   <p className="text-sm text-gray-600 mb-3">{tier.description}</p>
                   <Button 
                     className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700" 
-                    disabled={userBalance < tier.price || isProcessing}
-                    variant={userBalance < tier.price ? "outline" : "default"}
+                    disabled={currentBalance < tier.price || isProcessing}
+                    variant={currentBalance < tier.price ? "outline" : "default"}
                   >
                     {isProcessing && selectedTier === tier.id ? (
                       <div className="flex items-center gap-2">

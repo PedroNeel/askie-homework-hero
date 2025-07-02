@@ -1,17 +1,43 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserData } from "@/hooks/useUserData";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Camera, MessageSquare, Wallet, Star, Trophy, BookOpen, Users, Globe, Zap, Heart, Plus } from "lucide-react";
+import { Camera, MessageSquare, Wallet, Star, Trophy, BookOpen, Users, Globe, Zap, Heart, Plus, LogOut, User } from "lucide-react";
 import HomeworkCapture from "@/components/HomeworkCapture";
 import PaymentWallet from "@/components/PaymentWallet";
 import FamilyDashboard from "@/components/FamilyDashboard";
+import AuthPage from "@/components/AuthPage";
+import { toast } from "sonner";
 
 const Index = () => {
+  const { user, loading: authLoading, signOut } = useAuth();
+  const { wallet, sessions, loading: dataLoading } = useUserData();
   const [activeTab, setActiveTab] = useState("home");
-  const [userBalance, setUserBalance] = useState(25.50);
-  const [familyStars, setFamilyStars] = useState(47);
+
+  // Redirect to auth if not logged in
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <BookOpen className="w-8 h-8 text-white" />
+          </div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthPage />;
+  }
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success("Signed out successfully");
+  };
 
   const features = [
     {
@@ -111,12 +137,12 @@ const Index = () => {
             <div className="flex items-center gap-4">
               <Badge variant="secondary" className="gap-1 bg-emerald-100 text-emerald-700 border-emerald-200">
                 <Star className="w-4 h-4 text-emerald-600" />
-                {familyStars} Stars
+                {wallet?.total_stars || 0} Stars
               </Badge>
               <div className="flex items-center gap-1">
                 <Badge variant="outline" className="gap-1 border-purple-200 text-purple-700">
                   <Wallet className="w-4 h-4 text-purple-600" />
-                  R{userBalance.toFixed(2)}
+                  R{wallet?.balance?.toFixed(2) || '0.00'}
                 </Badge>
                 <Button 
                   size="sm" 
@@ -125,6 +151,15 @@ const Index = () => {
                   onClick={() => setActiveTab("wallet")}
                 >
                   <Plus className="w-4 h-4 text-purple-600" />
+                </Button>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="gap-1">
+                  <User className="w-4 h-4" />
+                  {user.user_metadata?.full_name || user.email?.split('@')[0]}
+                </Badge>
+                <Button size="sm" variant="ghost" onClick={handleSignOut}>
+                  <LogOut className="w-4 h-4" />
                 </Button>
               </div>
             </div>
@@ -163,16 +198,15 @@ const Index = () => {
               <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 via-blue-600/10 to-emerald-600/10"></div>
               <div className="container mx-auto px-4 text-center relative">
                 <Badge className="mb-6 animate-bounce bg-gradient-to-r from-purple-600 to-blue-600 text-white border-0">
-                  🚀 Now Available Across Africa
+                  🚀 Welcome back, {user.user_metadata?.full_name || user.email?.split('@')[0]}!
                 </Badge>
                 <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in">
-                  Turn Homework Hurdles Into
-                  <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent block">Learning Adventures</span>
+                  Your Learning Journey
+                  <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent block">Continues Here</span>
                 </h1>
                 <p className="text-xl text-slate-600 mb-8 max-w-3xl mx-auto animate-fade-in">
-                  The AI-powered homework assistant built for busy African parents. 
-                  Snap a photo, get instant explanations, and support your child's education - 
-                  all in under 30 seconds.
+                  You've completed {sessions.length} homework sessions and earned {wallet?.total_stars || 0} family stars!
+                  Keep learning and exploring with Askie.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in">
                   <Button 
@@ -181,11 +215,11 @@ const Index = () => {
                     onClick={() => setActiveTab("homework")}
                   >
                     <Camera className="w-5 h-5 mr-2" />
-                    Try It Now - Free
+                    Ask a Question
                   </Button>
-                  <Button size="lg" variant="outline" className="border-purple-200 text-purple-700 hover:bg-purple-50 transition-all hover:scale-105">
-                    <Globe className="w-5 h-5 mr-2" />
-                    Available in 5 Countries
+                  <Button size="lg" variant="outline" className="border-purple-200 text-purple-700 hover:bg-purple-50 transition-all hover:scale-105" onClick={() => setActiveTab("dashboard")}>
+                    <Trophy className="w-5 h-5 mr-2" />
+                    View Progress
                   </Button>
                 </div>
               </div>
@@ -290,9 +324,9 @@ const Index = () => {
         {activeTab === "homework" && (
           <div className="container mx-auto px-4 py-8">
             <HomeworkCapture 
-              userBalance={userBalance}
-              onBalanceUpdate={setUserBalance}
-              onStarsEarned={(stars) => setFamilyStars(prev => prev + stars)}
+              userBalance={wallet?.balance || 0}
+              onBalanceUpdate={() => {}} // Will be handled by the updated component
+              onStarsEarned={() => {}} // Will be handled by the updated component
             />
           </div>
         )}
@@ -300,8 +334,8 @@ const Index = () => {
         {activeTab === "wallet" && (
           <div className="container mx-auto px-4 py-8">
             <PaymentWallet 
-              balance={userBalance}
-              onBalanceUpdate={setUserBalance}
+              balance={wallet?.balance || 0}
+              onBalanceUpdate={() => {}} // Will be handled by the updated component
             />
           </div>
         )}
@@ -309,8 +343,8 @@ const Index = () => {
         {activeTab === "dashboard" && (
           <div className="container mx-auto px-4 py-8">
             <FamilyDashboard 
-              familyStars={familyStars}
-              totalQuestions={156}
+              familyStars={wallet?.total_stars || 0}
+              totalQuestions={sessions.length}
               streakDays={12}
             />
           </div>
