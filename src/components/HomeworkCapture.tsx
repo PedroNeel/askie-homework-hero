@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Camera, MessageSquare, Upload, Zap, BookOpen, Star, Clock, Volume2, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface HomeworkCaptureProps {
   userBalance: number;
@@ -22,6 +24,7 @@ interface AIResponse {
 }
 
 const HomeworkCapture = ({ userBalance, onBalanceUpdate, onStarsEarned }: HomeworkCaptureProps) => {
+  const { user } = useAuth();
   const { wallet, saveHomeworkSession, updateWalletBalance, addTransaction } = useUserData();
   const [question, setQuestion] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -59,54 +62,6 @@ const HomeworkCapture = ({ userBalance, onBalanceUpdate, onStarsEarned }: Homewo
     }
   ];
 
-  const sampleResponses = {
-    hint: {
-      text: "💡 **Quick Hint**: This is a quadratic equation! Try using the quadratic formula: x = (-b ± √(b²-4ac)) / 2a. Remember: a=1, b=-5, c=6",
-      timeEstimate: "30 seconds",
-      starsEarned: undefined
-    },
-    walkthrough: {
-      text: `📚 **Complete Solution**:
-
-**Step 1**: Identify the quadratic equation
-x² - 5x + 6 = 0
-
-**Step 2**: Use the quadratic formula
-x = (-b ± √(b²-4ac)) / 2a
-Where a=1, b=-5, c=6
-
-**Step 3**: Calculate the discriminant
-b² - 4ac = (-5)² - 4(1)(6) = 25 - 24 = 1
-
-**Step 4**: Solve for x
-x = (5 ± √1) / 2 = (5 ± 1) / 2
-
-**Step 5**: Find both solutions
-x₁ = (5 + 1) / 2 = 3
-x₂ = (5 - 1) / 2 = 2
-
-**Answer**: x = 2 or x = 3 ✅`,
-      timeEstimate: "2 minutes",
-      starsEarned: undefined
-    },
-    practice: {
-      text: `🎯 **Complete Solution + Practice**:
-
-[Same solution as walkthrough above]
-
-**Now try these similar problems**:
-1. x² - 7x + 12 = 0
-2. x² - 3x + 2 = 0
-3. x² - 8x + 15 = 0
-
-**Study Tip**: Look for two numbers that multiply to give 'c' and add to give 'b'!
-
-🌟 **Well done!** You've earned 2 Family Stars for completing this question!`,
-      timeEstimate: "5 minutes",
-      starsEarned: 2
-    }
-  };
-
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -122,7 +77,7 @@ x₂ = (5 - 1) / 2 = 2
     }
 
     const selectedTierData = questionTiers.find(t => t.id === tier);
-    if (!selectedTierData) return;
+    if (!selectedTierData || !user) return;
 
     if (currentBalance < selectedTierData.price) {
       toast.error("Insufficient balance. Please top up your wallet.");
@@ -132,10 +87,34 @@ x₂ = (5 - 1) / 2 = 2
     setIsProcessing(true);
     setSelectedTier(tier);
 
-    // Simulate AI processing
-    setTimeout(async () => {
-      const response = sampleResponses[tier as keyof typeof sampleResponses];
-      setAiResponse({ ...response, tier });
+    try {
+      let imageUrl = null;
+      if (imageFile) {
+        // Upload image to Supabase storage (implement if needed)
+        // For now, we'll use a placeholder
+        imageUrl = "uploaded_image_url";
+      }
+
+      // Call AI homework help function
+      const { data, error } = await supabase.functions.invoke('ai-homework-help', {
+        body: {
+          question: question || 'Please help me solve this problem from the image:',
+          tier,
+          imageUrl,
+          userId: user.id
+        }
+      });
+
+      if (error) throw error;
+
+      const response = {
+        text: data.aiResponse,
+        timeEstimate: data.timeEstimate,
+        tier,
+        starsEarned: data.starsEarned
+      };
+
+      setAiResponse(response);
       
       const newBalance = currentBalance - selectedTierData.price;
       const starsEarned = response.starsEarned || 0;
@@ -157,16 +136,39 @@ x₂ = (5 - 1) / 2 = 2
         response.text,
         starsEarned,
         selectedTierData.price,
-        imageFile ? 'uploaded_image' : undefined
+        imageUrl
       );
+
+      // Send completion email
+      if (user.email) {
+        await supabase.functions.invoke('send-notification-email', {
+          body: {
+            to: user.email,
+            subject: 'Homework Question Completed!',
+            type: 'homework_completed',
+            data: {
+              question: question || 'Image question',
+              tier: selectedTierData.name,
+              starsEarned
+            }
+          }
+        });
+      }
       
       if (starsEarned > 0) {
         toast.success(`Amazing! You earned ${starsEarned} Family Stars! 🌟`);
+        onStarsEarned(starsEarned);
       }
       
-      setIsProcessing(false);
+      onBalanceUpdate(newBalance);
       toast.success(`Answer generated! New balance: R${newBalance.toFixed(2)}`);
-    }, 2000);
+
+    } catch (error: any) {
+      console.error('Error processing homework:', error);
+      toast.error(error.message || "Failed to process homework question");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const resetCapture = () => {

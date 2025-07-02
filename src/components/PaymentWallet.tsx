@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -7,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Wallet, CreditCard, Smartphone, Plus, History, ArrowUpRight, ArrowDownLeft } from "lucide-react";
 import { toast } from "sonner";
+import { useUserData } from "@/hooks/useUserData";
+import MobileMoneyPayment from "./MobileMoneyPayment";
 
 interface PaymentWalletProps {
   balance: number;
@@ -14,44 +15,13 @@ interface PaymentWalletProps {
 }
 
 const PaymentWallet = ({ balance, onBalanceUpdate }: PaymentWalletProps) => {
+  const { wallet, addTransaction, updateWalletBalance } = useUserData();
   const [topUpAmount, setTopUpAmount] = useState("");
-  const [selectedProvider, setSelectedProvider] = useState("");
+  const [showPayment, setShowPayment] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const paymentProviders = [
-    {
-      id: "mpesa",
-      name: "M-Pesa",
-      country: "Kenya",
-      logo: "🇰🇪",
-      color: "bg-emerald-100 text-emerald-700",
-      minAmount: 10
-    },
-    {
-      id: "mtn-momo",
-      name: "MTN MoMo",
-      country: "Ghana/Uganda",
-      logo: "🇬🇭",
-      color: "bg-amber-100 text-amber-700",
-      minAmount: 15
-    },
-    {
-      id: "flutterwave",
-      name: "Flutterwave",
-      country: "Nigeria/Multi",
-      logo: "🇳🇬",
-      color: "bg-orange-100 text-orange-700",
-      minAmount: 20
-    },
-    {
-      id: "snapscan",
-      name: "SnapScan",
-      country: "South Africa",
-      logo: "🇿🇦",
-      color: "bg-blue-100 text-blue-700",
-      minAmount: 12
-    }
-  ];
+  // Use wallet data from hook instead of props
+  const currentBalance = wallet?.balance || 0;
 
   const quickAmounts = [20, 50, 100, 200];
 
@@ -63,30 +33,54 @@ const PaymentWallet = ({ balance, onBalanceUpdate }: PaymentWalletProps) => {
     { id: 5, type: "payment", amount: -2, description: "Quick math hint", date: "2025-01-13", status: "completed" }
   ];
 
-  const handleTopUp = async () => {
+  const handleTopUpClick = () => {
     const amount = parseFloat(topUpAmount);
     if (!amount || amount < 10) {
       toast.error("Minimum top-up amount is R10");
       return;
     }
-
-    if (!selectedProvider) {
-      toast.error("Please select a payment provider");
-      return;
-    }
-
-    setIsProcessing(true);
-
-    // Simulate payment processing
-    setTimeout(() => {
-      onBalanceUpdate(balance + amount);
-      setTopUpAmount("");
-      setSelectedProvider("");
-      setIsProcessing(false);
-      
-      toast.success(`Successfully topped up R${amount.toFixed(2)} via ${paymentProviders.find(p => p.id === selectedProvider)?.name}!`);
-    }, 3000);
+    setShowPayment(true);
   };
+
+  const handlePaymentSuccess = async (amount: number) => {
+    try {
+      const newBalance = currentBalance + amount;
+      
+      // Update wallet in database
+      await updateWalletBalance(newBalance);
+      
+      // Add transaction record
+      await addTransaction(
+        amount,
+        'top_up',
+        'Mobile Money top-up'
+      );
+      
+      onBalanceUpdate(newBalance);
+      setTopUpAmount("");
+      setShowPayment(false);
+      
+      toast.success(`Successfully topped up R${amount.toFixed(2)}!`);
+    } catch (error) {
+      toast.error("Failed to update wallet balance");
+    }
+  };
+
+  const handlePaymentCancel = () => {
+    setShowPayment(false);
+  };
+
+  if (showPayment) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <MobileMoneyPayment
+          amount={parseFloat(topUpAmount)}
+          onSuccess={handlePaymentSuccess}
+          onCancel={handlePaymentCancel}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -100,8 +94,8 @@ const PaymentWallet = ({ balance, onBalanceUpdate }: PaymentWalletProps) => {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-purple-100 mb-1">Available Balance</p>
-            <p className="text-3xl font-bold">R{balance.toFixed(2)}</p>
-            <p className="text-purple-200 text-sm">≈ {Math.floor(balance / 2.5)} questions</p>
+            <p className="text-3xl font-bold">R{currentBalance.toFixed(2)}</p>
+            <p className="text-purple-200 text-sm">≈ {Math.floor(currentBalance / 2.5)} questions</p>
           </div>
           <div className="text-6xl opacity-20">
             <Wallet />
@@ -150,51 +144,15 @@ const PaymentWallet = ({ balance, onBalanceUpdate }: PaymentWalletProps) => {
                 />
               </div>
             </div>
-          </Card>
-
-          {/* Payment Providers */}
-          <Card className="p-6 border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-            <h3 className="text-lg font-semibold mb-4 text-slate-800">Choose Payment Method</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {paymentProviders.map((provider) => (
-                <Card
-                  key={provider.id}
-                  className={`p-4 cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg border-2 ${
-                    selectedProvider === provider.id ? 'border-purple-400 bg-purple-50' : 'border-gray-200 hover:border-purple-300'
-                  }`}
-                  onClick={() => setSelectedProvider(provider.id)}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="text-2xl">{provider.logo}</div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-slate-800">{provider.name}</h4>
-                      <p className="text-sm text-slate-600">{provider.country}</p>
-                    </div>
-                    <Badge className={provider.color}>
-                      Min R{provider.minAmount}
-                    </Badge>
-                  </div>
-                </Card>
-              ))}
-            </div>
 
             <Button 
               className="w-full mt-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg hover:shadow-xl" 
               size="lg"
-              onClick={handleTopUp}
-              disabled={!topUpAmount || !selectedProvider || isProcessing}
+              onClick={handleTopUpClick}
+              disabled={!topUpAmount || isProcessing}
             >
-              {isProcessing ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Processing Payment...
-                </div>
-              ) : (
-                <>
-                  <CreditCard className="w-5 h-5 mr-2" />
-                  Top Up R{topUpAmount || "0"}
-                </>
-              )}
+              <Smartphone className="w-5 h-5 mr-2" />
+              Top Up with Mobile Money
             </Button>
           </Card>
         </TabsContent>
