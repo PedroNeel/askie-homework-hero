@@ -45,6 +45,48 @@ export type Database = {
         }
         Relationships: []
       }
+      mobile_money_payments: {
+        Row: {
+          amount: number
+          callback_url: string | null
+          created_at: string
+          id: string
+          phone_number: string
+          provider: string
+          provider_request_id: string | null
+          provider_transaction_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          callback_url?: string | null
+          created_at?: string
+          id?: string
+          phone_number: string
+          provider: string
+          provider_request_id?: string | null
+          provider_transaction_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          callback_url?: string | null
+          created_at?: string
+          id?: string
+          phone_number?: string
+          provider?: string
+          provider_request_id?: string | null
+          provider_transaction_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -105,6 +147,10 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          phone_number: string | null
+          provider: string | null
+          provider_transaction_id: string | null
+          status: string | null
           transaction_type: string
           user_id: string
         }
@@ -113,6 +159,10 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          phone_number?: string | null
+          provider?: string | null
+          provider_transaction_id?: string | null
+          status?: string | null
           transaction_type: string
           user_id: string
         }
@@ -121,6 +171,10 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          phone_number?: string | null
+          provider?: string | null
+          provider_transaction_id?: string | null
+          status?: string | null
           transaction_type?: string
           user_id?: string
         }
