@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Smartphone } from "lucide-react";
+import { Wallet } from "lucide-react";
 import { toast } from "sonner";
 
 interface TopUpSectionProps {
@@ -60,8 +60,8 @@ const TopUpSection = ({ balance, onTopUpClick, isProcessing }: TopUpSectionProps
         onClick={handleTopUpClick}
         disabled={!topUpAmount || isProcessing}
       >
-        <Smartphone className="w-5 h-5 mr-2" />
-        Top Up with Mobile Money
+        <Wallet className="w-5 h-5 mr-2" />
+        💳 Fund Your Wallet
       </Button>
     </Card>
   );
