@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -9,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Globe, Check } from "lucide-react";
+import { Globe, Check, Search } from "lucide-react";
 import { toast } from "sonner";
 
 const africanLanguages = [
@@ -122,54 +124,95 @@ const africanLanguages = [
   { code: "zu", name: "Zulu", country: "🇿🇦" }
 ];
 
-const LanguageSelector = () => {
+interface LanguageSelectorProps {
+  onLanguageChange?: (languageCode: string) => void;
+}
+
+const LanguageSelector = ({ onLanguageChange }: LanguageSelectorProps) => {
   const [selectedLanguage, setSelectedLanguage] = useState("en");
-  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleLanguageChange = (languageCode: string) => {
     setSelectedLanguage(languageCode);
     const selectedLang = africanLanguages.find(lang => lang.code === languageCode);
     toast.success(`Language changed to ${selectedLang?.name} ${selectedLang?.country}`);
+    
+    // Store language preference
+    localStorage.setItem('preferred-language', languageCode);
+    
+    // Call parent callback if provided
+    if (onLanguageChange) {
+      onLanguageChange(languageCode);
+    }
   };
+
+  const filteredLanguages = africanLanguages.filter(language =>
+    language.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    language.code.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const currentLanguage = africanLanguages.find(lang => lang.code === selectedLanguage);
 
   return (
-    <Card className="p-4 border-0 shadow-md bg-white/80 backdrop-blur-sm">
-      <div className="flex items-center gap-3 mb-3">
-        <Globe className="w-5 h-5 text-purple-600" />
-        <h3 className="font-semibold text-slate-800">Choose Your Language</h3>
+    <Card className="p-6 border-0 shadow-lg bg-white/90 backdrop-blur-sm">
+      <div className="flex items-center gap-3 mb-4">
+        <Globe className="w-6 h-6 text-purple-600" />
+        <h3 className="text-lg font-semibold text-slate-800">Choose Your Language</h3>
       </div>
       
-      <Select value={selectedLanguage} onValueChange={handleLanguageChange}>
-        <SelectTrigger className="w-full border-purple-200 focus:border-purple-400">
-          <SelectValue>
-            <div className="flex items-center gap-2">
-              <span className="text-lg">{currentLanguage?.country}</span>
-              <span>{currentLanguage?.name}</span>
-            </div>
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent className="max-h-60 bg-white border-purple-200">
-          {africanLanguages.map((language) => (
-            <SelectItem 
-              key={language.code} 
-              value={language.code}
-              className="flex items-center gap-2 hover:bg-purple-50"
-            >
-              <div className="flex items-center gap-2 w-full">
-                <span className="text-lg">{language.country}</span>
-                <span className="flex-1">{language.name}</span>
-                {selectedLanguage === language.code && (
-                  <Check className="w-4 h-4 text-purple-600" />
-                )}
-              </div>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      {/* Search Input */}
+      <div className="relative mb-4">
+        <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+        <Input
+          type="text"
+          placeholder="Search languages..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-10 border-purple-200 focus:border-purple-400"
+        />
+      </div>
+
+      {/* Current Selection Display */}
+      <div className="mb-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">{currentLanguage?.country}</span>
+          <div>
+            <p className="font-medium text-purple-800">{currentLanguage?.name}</p>
+            <p className="text-sm text-purple-600">Currently selected</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Language List with ScrollArea */}
+      <div className="space-y-2">
+        <h4 className="text-sm font-medium text-slate-600 mb-2">
+          Available Languages ({filteredLanguages.length})
+        </h4>
+        <ScrollArea className="h-64 w-full border border-purple-200 rounded-lg">
+          <div className="p-2">
+            {filteredLanguages.map((language) => (
+              <Button
+                key={language.code}
+                variant="ghost"
+                className={`w-full justify-start h-auto p-3 mb-1 hover:bg-purple-50 ${
+                  selectedLanguage === language.code ? 'bg-purple-100 border border-purple-300' : ''
+                }`}
+                onClick={() => handleLanguageChange(language.code)}
+              >
+                <div className="flex items-center gap-3 w-full">
+                  <span className="text-xl">{language.country}</span>
+                  <span className="flex-1 text-left font-medium">{language.name}</span>
+                  {selectedLanguage === language.code && (
+                    <Check className="w-5 h-5 text-purple-600" />
+                  )}
+                </div>
+              </Button>
+            ))}
+          </div>
+        </ScrollArea>
+      </div>
       
-      <p className="text-xs text-slate-500 mt-2">
+      <p className="text-xs text-slate-500 mt-4 text-center">
         🌍 Supporting 80+ African languages for better learning
       </p>
     </Card>

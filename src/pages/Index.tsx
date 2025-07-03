@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useUserData } from "@/hooks/useUserData";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -14,6 +15,7 @@ import LanguageSelector from "@/components/LanguageSelector";
 
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
+  const { t, setLanguage } = useLanguage();
   const { wallet, sessions, loading: dataLoading } = useUserData();
   const [activeTab, setActiveTab] = useState("home");
 
@@ -25,7 +27,7 @@ const Index = () => {
           <div className="w-16 h-16 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center mx-auto mb-4 animate-pulse">
             <BookOpen className="w-8 h-8 text-white" />
           </div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-gray-600">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -40,26 +42,30 @@ const Index = () => {
     toast.success("Signed out successfully");
   };
 
+  const handleLanguageChange = (languageCode: string) => {
+    setLanguage(languageCode);
+  };
+
   const features = [
     {
       icon: Camera,
-      title: "Snap & Solve",
-      description: "Take a photo of any homework question and get instant, step-by-step explanations"
+      title: t('features.snap_solve'),
+      description: t('features.snap_solve_desc')
     },
     {
       icon: MessageSquare,
-      title: "AI Tutor Chat",
-      description: "Ask questions in text or voice - supports multiple African languages"
+      title: t('features.ai_tutor'),
+      description: t('features.ai_tutor_desc')
     },
     {
       icon: Wallet,
-      title: "Mobile Money",
-      description: "Pay seamlessly with M-Pesa, MTN MoMo, or Flutterwave - micro-payments from R2"
+      title: t('features.mobile_money'),
+      description: t('features.mobile_money_desc')
     },
     {
       icon: BookOpen,
-      title: "Curriculum Aligned",
-      description: "Answers tailored to CAPS, WAEC, and local African curricula"
+      title: t('features.curriculum'),
+      description: t('features.curriculum_desc')
     }
   ];
 
@@ -110,35 +116,35 @@ const Index = () => {
                 onClick={() => setActiveTab("home")}
                 className={activeTab === "home" ? "bg-gradient-to-r from-purple-600 to-blue-600" : "hover:bg-purple-50"}
               >
-                Home
+                {t('nav.home')}
               </Button>
               <Button 
                 variant={activeTab === "homework" ? "default" : "ghost"}
                 onClick={() => setActiveTab("homework")}
                 className={activeTab === "homework" ? "bg-gradient-to-r from-purple-600 to-blue-600" : "hover:bg-purple-50"}
               >
-                Ask Question
+                {t('nav.ask_question')}
               </Button>
               <Button 
                 variant={activeTab === "wallet" ? "default" : "ghost"}
                 onClick={() => setActiveTab("wallet")}
                 className={activeTab === "wallet" ? "bg-gradient-to-r from-purple-600 to-blue-600" : "hover:bg-purple-50"}
               >
-                Wallet
+                {t('nav.wallet')}
               </Button>
               <Button 
                 variant={activeTab === "dashboard" ? "default" : "ghost"}
                 onClick={() => setActiveTab("dashboard")}
                 className={activeTab === "dashboard" ? "bg-gradient-to-r from-purple-600 to-blue-600" : "hover:bg-purple-50"}
               >
-                Family Dashboard
+                {t('nav.family_dashboard')}
               </Button>
             </div>
 
             <div className="flex items-center gap-4">
               <Badge variant="secondary" className="gap-1 bg-emerald-100 text-emerald-700 border-emerald-200">
                 <Star className="w-4 h-4 text-emerald-600" />
-                {wallet?.total_stars || 0} Stars
+                {wallet?.total_stars || 0} {t('wallet.stars')}
               </Badge>
               <div className="flex items-center gap-1">
                 <Badge variant="outline" className="gap-1 border-purple-200 text-purple-700">
@@ -172,9 +178,9 @@ const Index = () => {
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-lg border-t border-purple-100">
         <div className="flex">
           {[
-            { id: "home", icon: BookOpen, label: "Home" },
+            { id: "home", icon: BookOpen, label: t('nav.home') },
             { id: "homework", icon: Camera, label: "Ask" },
-            { id: "wallet", icon: Wallet, label: "Wallet" },
+            { id: "wallet", icon: Wallet, label: t('nav.wallet') },
             { id: "dashboard", icon: Trophy, label: "Family" }
           ].map(({ id, icon: Icon, label }) => (
             <Button
@@ -195,7 +201,7 @@ const Index = () => {
         <div className="container mx-auto px-4 py-8 space-y-12">
           {/* Language Selector Section */}
           <div className="max-w-md mx-auto">
-            <LanguageSelector />
+            <LanguageSelector onLanguageChange={handleLanguageChange} />
           </div>
 
           <div className="border-b border-purple-200/30 mb-8"></div>
@@ -207,15 +213,18 @@ const Index = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 via-blue-600/10 to-emerald-600/10"></div>
                 <div className="container mx-auto px-4 text-center relative">
                   <Badge className="mb-8 animate-bounce bg-gradient-to-r from-purple-600 to-blue-600 text-white border-0">
-                    🚀 Welcome back, {user.user_metadata?.full_name || user.email?.split('@')[0]}!
+                    🚀 {t('hero.welcome_back')}, {user.user_metadata?.full_name || user.email?.split('@')[0]}!
                   </Badge>
                   <h1 className="text-4xl md:text-6xl font-bold mb-8 animate-fade-in">
-                    Your Learning Journey
-                    <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent block mt-2">Continues Here</span>
+                    {t('hero.learning_journey')}
+                    <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent block mt-2">
+                      {t('hero.continues_here')}
+                    </span>
                   </h1>
                   <p className="text-xl text-slate-600 mb-10 max-w-3xl mx-auto animate-fade-in leading-relaxed">
-                    You've completed {sessions.length} homework sessions and earned {wallet?.total_stars || 0} family stars!
-                    Keep learning and exploring with Askie.
+                    {t('hero.sessions_completed', { count: sessions.length, stars: wallet?.total_stars || 0 })}
+                    <br />
+                    {t('hero.keep_learning')}
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in">
                     <Button 
@@ -224,11 +233,11 @@ const Index = () => {
                       onClick={() => setActiveTab("homework")}
                     >
                       <Camera className="w-5 h-5 mr-2" />
-                      Ask a Question
+                      {t('hero.ask_question')}
                     </Button>
                     <Button size="lg" variant="outline" className="border-purple-200 text-purple-700 hover:bg-purple-50 transition-all hover:scale-105" onClick={() => setActiveTab("dashboard")}>
                       <Trophy className="w-5 h-5 mr-2" />
-                      View Progress
+                      {t('hero.view_progress')}
                     </Button>
                   </div>
                 </div>
@@ -334,8 +343,8 @@ const Index = () => {
             <div className="container mx-auto px-4 py-12">
               <HomeworkCapture 
                 userBalance={wallet?.balance || 0}
-                onBalanceUpdate={() => {}} // Will be handled by the updated component
-                onStarsEarned={() => {}} // Will be handled by the updated component
+                onBalanceUpdate={() => {}}
+                onStarsEarned={() => {}}
               />
             </div>
           )}
@@ -344,7 +353,7 @@ const Index = () => {
             <div className="container mx-auto px-4 py-12">
               <PaymentWallet 
                 balance={wallet?.balance || 0}
-                onBalanceUpdate={() => {}} // Will be handled by the updated component
+                onBalanceUpdate={() => {}}
               />
             </div>
           )}

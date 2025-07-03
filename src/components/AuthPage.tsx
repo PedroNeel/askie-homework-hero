@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -10,7 +11,10 @@ import { toast } from 'sonner';
 
 const AuthPage = () => {
   const { signIn, signUp } = useAuth();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('signin');
+  const [showEmailVerification, setShowEmailVerification] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -31,6 +35,9 @@ const AuthPage = () => {
     if (error) {
       if (error.message.includes('Invalid login credentials')) {
         toast.error('Invalid email or password. Please try again.');
+      } else if (error.message.includes('Email not confirmed')) {
+        setShowEmailVerification(true);
+        toast.error('Please verify your email address first');
       } else {
         toast.error(error.message);
       }
@@ -67,7 +74,16 @@ const AuthPage = () => {
         toast.error(error.message);
       }
     } else {
-      toast.success('Account created! Please check your email to verify your account.');
+      toast.success(t('auth.account_created'));
+      // Clear form and switch to sign in tab
+      setFormData({
+        email: formData.email, // Keep email for convenience
+        password: '',
+        fullName: '',
+        confirmPassword: ''
+      });
+      setActiveTab('signin');
+      setShowEmailVerification(true);
     }
     setLoading(false);
   };
@@ -80,15 +96,28 @@ const AuthPage = () => {
             <BookOpen className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
-            Welcome to Askie
+            {t('auth.welcome')}
           </h1>
-          <p className="text-gray-600">Your AI homework assistant</p>
+          <p className="text-gray-600">{t('auth.ai_assistant')}</p>
         </div>
 
-        <Tabs defaultValue="signin" className="w-full">
+        {/* Email Verification Alert */}
+        {showEmailVerification && (
+          <div className="mb-6 p-4 bg-red-50 rounded-lg border border-red-200">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+              <div className="text-sm text-red-700">
+                <p className="font-medium mb-1">Email Verification Required</p>
+                <p>{t('auth.verify_email')}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="signin">Sign In</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsTrigger value="signin">{t('auth.sign_in')}</TabsTrigger>
+            <TabsTrigger value="signup">{t('auth.sign_up')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="signin">
@@ -98,7 +127,7 @@ const AuthPage = () => {
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     type="email"
-                    placeholder="Email address"
+                    placeholder={t('auth.email')}
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="pl-10"
@@ -109,7 +138,7 @@ const AuthPage = () => {
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     type="password"
-                    placeholder="Password"
+                    placeholder={t('auth.password')}
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     className="pl-10"
@@ -122,7 +151,7 @@ const AuthPage = () => {
                 className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                 disabled={loading}
               >
-                {loading ? 'Signing in...' : 'Sign In'}
+                {loading ? t('auth.signing_in') : t('auth.sign_in')}
               </Button>
             </form>
           </TabsContent>
@@ -134,7 +163,7 @@ const AuthPage = () => {
                   <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     type="text"
-                    placeholder="Full name"
+                    placeholder={t('auth.full_name')}
                     value={formData.fullName}
                     onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                     className="pl-10"
@@ -145,7 +174,7 @@ const AuthPage = () => {
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     type="email"
-                    placeholder="Email address"
+                    placeholder={t('auth.email')}
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="pl-10"
@@ -167,7 +196,7 @@ const AuthPage = () => {
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     type="password"
-                    placeholder="Confirm password"
+                    placeholder={t('auth.confirm_password')}
                     value={formData.confirmPassword}
                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                     className="pl-10"
@@ -180,7 +209,7 @@ const AuthPage = () => {
                 className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                 disabled={loading}
               >
-                {loading ? 'Creating account...' : 'Create Account'}
+                {loading ? t('auth.creating_account') : t('auth.create_account')}
               </Button>
             </form>
           </TabsContent>
@@ -190,8 +219,8 @@ const AuthPage = () => {
           <div className="flex items-start gap-2">
             <AlertCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
             <div className="text-sm text-blue-700">
-              <p className="font-medium mb-1">Getting Started</p>
-              <p>Sign up to save your homework sessions, track your progress, and manage your wallet balance.</p>
+              <p className="font-medium mb-1">{t('auth.getting_started')}</p>
+              <p>{t('auth.sign_up_benefits')}</p>
             </div>
           </div>
         </div>
