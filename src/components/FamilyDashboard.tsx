@@ -15,6 +15,7 @@ import {
   Flame,
   Gift
 } from "lucide-react";
+import RewardsSystem from "./homework/RewardsSystem";
 
 interface FamilyDashboardProps {
   familyStars: number;
@@ -23,6 +24,8 @@ interface FamilyDashboardProps {
 }
 
 const FamilyDashboard = ({ familyStars, totalQuestions, streakDays }: FamilyDashboardProps) => {
+  const userLevel = Math.floor(familyStars / 50) + 1;
+
   const achievements = [
     { 
       id: 1, 
@@ -75,15 +78,8 @@ const FamilyDashboard = ({ familyStars, totalQuestions, streakDays }: FamilyDash
     { name: "History", questions: 18, improvement: "+31%", color: "bg-purple-100 text-purple-700" }
   ];
 
-  const rewards = [
-    { stars: 50, reward: "Extra screen time", unlocked: familyStars >= 50 },
-    { stars: 100, reward: "Weekend outing", unlocked: familyStars >= 100 },
-    { stars: 150, reward: "New book", unlocked: familyStars >= 150 },
-    { stars: 200, reward: "Toy of choice", unlocked: familyStars >= 200 }
-  ];
-
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-8">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold gradient-text mb-2">Family Learning Dashboard</h1>
         <p className="text-gray-600">Track progress, celebrate achievements, and stay motivated together!</p>
@@ -131,6 +127,13 @@ const FamilyDashboard = ({ familyStars, totalQuestions, streakDays }: FamilyDash
           </div>
         </Card>
       </div>
+
+      {/* Rewards System */}
+      <RewardsSystem 
+        userLevel={userLevel}
+        totalStars={familyStars}
+        questionsCompleted={totalQuestions}
+      />
 
       {/* Weekly Progress */}
       <Card className="p-6">
@@ -215,41 +218,6 @@ const FamilyDashboard = ({ familyStars, totalQuestions, streakDays }: FamilyDash
           </div>
         </Card>
       </div>
-
-      {/* Rewards System */}
-      <Card className="p-6">
-        <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <Gift className="w-5 h-5" />
-          Family Rewards ({familyStars} stars earned)
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {rewards.map((reward, index) => (
-            <Card key={index} className={`p-4 ${
-              reward.unlocked ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'
-            }`}>
-              <div className="text-center">
-                <div className={`w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center ${
-                  reward.unlocked ? 'bg-green-100' : 'bg-gray-100'
-                }`}>
-                  <Gift className={`w-6 h-6 ${
-                    reward.unlocked ? 'text-green-600' : 'text-gray-400'
-                  }`} />
-                </div>
-                <div className="font-medium mb-1">{reward.reward}</div>
-                <div className="text-sm text-gray-600 mb-2">{reward.stars} stars</div>
-                <Button 
-                  size="sm" 
-                  variant={reward.unlocked ? "default" : "outline"}
-                  disabled={!reward.unlocked}
-                  className="w-full"
-                >
-                  {reward.unlocked ? "Claim Reward" : "Locked"}
-                </Button>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </Card>
 
       {/* Motivation Section */}
       <Card className="p-6 bg-gradient-africa text-white">

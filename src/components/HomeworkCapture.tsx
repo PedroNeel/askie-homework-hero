@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import QuestionInput from "./homework/QuestionInput";
 import AnswerTiers from "./homework/AnswerTiers";
 import GamificationLevel from "./homework/GamificationLevel";
+import RewardsSystem from "./homework/RewardsSystem";
 import HomeworkResponse from "./homework/HomeworkResponse";
 
 interface HomeworkCaptureProps {
@@ -147,7 +148,7 @@ const HomeworkCapture = ({ userBalance, onBalanceUpdate, onStarsEarned }: Homewo
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-8">
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">Ask Askie Anything!</h1>
         <p className="text-gray-600">Snap a photo or type your homework question</p>
@@ -157,6 +158,12 @@ const HomeworkCapture = ({ userBalance, onBalanceUpdate, onStarsEarned }: Homewo
       </div>
 
       <GamificationLevel 
+        userLevel={userLevel}
+        totalStars={wallet?.total_stars || 0}
+        questionsCompleted={sessions.length}
+      />
+
+      <RewardsSystem 
         userLevel={userLevel}
         totalStars={wallet?.total_stars || 0}
         questionsCompleted={sessions.length}
