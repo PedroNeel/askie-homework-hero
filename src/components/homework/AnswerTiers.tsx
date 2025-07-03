@@ -1,0 +1,79 @@
+
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Zap, BookOpen, Star } from "lucide-react";
+
+interface AnswerTiersProps {
+  currentBalance: number;
+  onTierSelect: (tier: string) => void;
+  isProcessing: boolean;
+  selectedTier: string;
+}
+
+const AnswerTiers = ({ currentBalance, onTierSelect, isProcessing, selectedTier }: AnswerTiersProps) => {
+  const questionTiers = [
+    {
+      id: "hint",
+      name: "Quick Hint",
+      price: 2.00,
+      icon: Zap,
+      description: "Fast pointer in the right direction",
+      color: "bg-purple-100 text-purple-700"
+    },
+    {
+      id: "walkthrough",
+      name: "Full Walkthrough", 
+      price: 5.00,
+      icon: BookOpen,
+      description: "Complete step-by-step solution",
+      color: "bg-blue-100 text-blue-700"
+    },
+    {
+      id: "practice",
+      name: "Try It Yourself",
+      price: 8.00,
+      icon: Star,
+      description: "Solution + similar practice questions",
+      color: "bg-emerald-100 text-emerald-700"
+    }
+  ];
+
+  return (
+    <Card className="p-6 border-0 shadow-lg bg-white/70 backdrop-blur-sm">
+      <h2 className="text-xl font-semibold mb-4">Choose Your Answer Level</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {questionTiers.map((tier) => (
+          <Card 
+            key={tier.id}
+            className={`p-4 cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl border-2 ${selectedTier === tier.id ? 'border-purple-400 bg-purple-50' : 'border-gray-200 hover:border-purple-300'}`}
+            onClick={() => onTierSelect(tier.id)}
+          >
+            <div className="flex items-center justify-between mb-2">
+              <tier.icon className="w-6 h-6 text-purple-600" />
+              <Badge className={tier.color}>R{tier.price.toFixed(2)}</Badge>
+            </div>
+            <h3 className="font-semibold mb-1">{tier.name}</h3>
+            <p className="text-sm text-gray-600 mb-3">{tier.description}</p>
+            <Button 
+              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700" 
+              disabled={currentBalance < tier.price || isProcessing}
+              variant={currentBalance < tier.price ? "outline" : "default"}
+            >
+              {isProcessing && selectedTier === tier.id ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Processing...
+                </div>
+              ) : (
+                `Get ${tier.name}`
+              )}
+            </Button>
+          </Card>
+        ))}
+      </div>
+    </Card>
+  );
+};
+
+export default AnswerTiers;
