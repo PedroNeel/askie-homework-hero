@@ -8,11 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Eye, EyeOff, BookOpen, Brain, Users } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageSelector from "./LanguageSelector";
 
 const AuthPage = () => {
-  const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -22,7 +20,7 @@ const AuthPage = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password || !fullName) {
-      toast.error(t('auth.fill_all_fields'));
+      toast.error("Please fill in all fields");
       return;
     }
 
@@ -39,7 +37,7 @@ const AuthPage = () => {
       });
 
       if (error) throw error;
-      toast.success(t('auth.check_email'));
+      toast.success("Please check your email to confirm your account");
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -50,7 +48,7 @@ const AuthPage = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      toast.error(t('auth.fill_all_fields'));
+      toast.error("Please fill in all fields");
       return;
     }
 
@@ -62,7 +60,7 @@ const AuthPage = () => {
       });
 
       if (error) throw error;
-      toast.success(t('auth.welcome_back'));
+      toast.success("Welcome back!");
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -81,10 +79,10 @@ const AuthPage = () => {
         <div className="text-white space-y-6 text-center lg:text-left">
           <div className="space-y-4">
             <h1 className="text-4xl lg:text-6xl font-bold">
-              {t('auth.welcome_to')} <span className="text-baobab-200">Askie</span>
+              Welcome to <span className="text-baobab-200">Askie</span>
             </h1>
             <p className="text-xl lg:text-2xl text-gray-200">
-              {t('auth.subtitle')}
+              Your AI-powered homework assistant designed for African students
             </p>
           </div>
 
@@ -94,8 +92,8 @@ const AuthPage = () => {
                 <BookOpen className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg">{t('auth.feature_homework')}</h3>
-                <p className="text-gray-300">{t('auth.feature_homework_desc')}</p>
+                <h3 className="font-semibold text-lg">Homework Help</h3>
+                <p className="text-gray-300">Get instant help with your homework questions</p>
               </div>
             </div>
 
@@ -104,8 +102,8 @@ const AuthPage = () => {
                 <Brain className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg">{t('auth.feature_ai')}</h3>
-                <p className="text-gray-300">{t('auth.feature_ai_desc')}</p>
+                <h3 className="font-semibold text-lg">AI Tutor</h3>
+                <p className="text-gray-300">Smart AI that adapts to your learning style</p>
               </div>
             </div>
 
@@ -114,8 +112,8 @@ const AuthPage = () => {
                 <Users className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="font-semibold text-lg">{t('auth.feature_family')}</h3>
-                <p className="text-gray-300">{t('auth.feature_family_desc')}</p>
+                <h3 className="font-semibold text-lg">Family Dashboard</h3>
+                <p className="text-gray-300">Track progress with your family</p>
               </div>
             </div>
           </div>
@@ -125,27 +123,27 @@ const AuthPage = () => {
         <Card className="w-full max-w-md mx-auto p-6 bg-white/95 backdrop-blur-sm shadow-2xl">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold gradient-text">
-              {t('auth.get_started')}
+              Get Started with Askie
             </h2>
             <p className="text-gray-600 mt-2">
-              {t('auth.join_community')}
+              Join thousands of students across Africa
             </p>
           </div>
 
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">{t('auth.sign_in')}</TabsTrigger>
-              <TabsTrigger value="signup">{t('auth.sign_up')}</TabsTrigger>
+              <TabsTrigger value="signin">Sign In</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
 
             <TabsContent value="signin" className="space-y-4">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email">{t('auth.email')}</Label>
+                  <Label htmlFor="signin-email">Email</Label>
                   <Input
                     id="signin-email"
                     type="email"
-                    placeholder={t('auth.email_placeholder')}
+                    placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="border-2 border-gray-200 focus:border-sunset-400"
@@ -153,12 +151,12 @@ const AuthPage = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password">{t('auth.password')}</Label>
+                  <Label htmlFor="signin-password">Password</Label>
                   <div className="relative">
                     <Input
                       id="signin-password"
                       type={showPassword ? "text" : "password"}
-                      placeholder={t('auth.password_placeholder')}
+                      placeholder="Enter your password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="border-2 border-gray-200 focus:border-sunset-400 pr-10"
@@ -184,7 +182,7 @@ const AuthPage = () => {
                   className="w-full bg-gradient-to-r from-sunset-500 to-baobab-500 hover:from-sunset-600 hover:to-baobab-600"
                   disabled={loading}
                 >
-                  {loading ? t('auth.signing_in') : t('auth.sign_in')}
+                  {loading ? "Signing in..." : "Sign In"}
                 </Button>
               </form>
             </TabsContent>
@@ -192,11 +190,11 @@ const AuthPage = () => {
             <TabsContent value="signup" className="space-y-4">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-name">{t('auth.full_name')}</Label>
+                  <Label htmlFor="signup-name">Full Name</Label>
                   <Input
                     id="signup-name"
                     type="text"
-                    placeholder={t('auth.full_name_placeholder')}
+                    placeholder="Enter your full name"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     className="border-2 border-gray-200 focus:border-sunset-400"
@@ -204,11 +202,11 @@ const AuthPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">{t('auth.email')}</Label>
+                  <Label htmlFor="signup-email">Email</Label>
                   <Input
                     id="signup-email"
                     type="email"
-                    placeholder={t('auth.email_placeholder')}
+                    placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="border-2 border-gray-200 focus:border-sunset-400"
@@ -216,12 +214,12 @@ const AuthPage = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">{t('auth.password')}</Label>
+                  <Label htmlFor="signup-password">Password</Label>
                   <div className="relative">
                     <Input
                       id="signup-password"
                       type={showPassword ? "text" : "password"}
-                      placeholder={t('auth.password_placeholder')}
+                      placeholder="Create a password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       className="border-2 border-gray-200 focus:border-sunset-400 pr-10"
@@ -247,7 +245,7 @@ const AuthPage = () => {
                   className="w-full bg-gradient-to-r from-sunset-500 to-baobab-500 hover:from-sunset-600 hover:to-baobab-600"
                   disabled={loading}
                 >
-                  {loading ? t('auth.creating_account') : t('auth.create_account')}
+                  {loading ? "Creating account..." : "Create Account"}
                 </Button>
               </form>
             </TabsContent>
