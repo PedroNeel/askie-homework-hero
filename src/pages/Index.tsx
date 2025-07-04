@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -16,7 +15,7 @@ import LanguageSelector from "@/components/LanguageSelector";
 
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
-  const { t, setLanguage } = useLanguage();
+  const { t } = useLanguage();
   const { wallet, sessions, loading: dataLoading } = useUserData();
   const [activeTab, setActiveTab] = useState("home");
 
@@ -219,7 +218,7 @@ const Index = () => {
                     </span>
                   </h1>
                   <p className="text-xl text-slate-600 mb-10 max-w-3xl mx-auto animate-fade-in leading-relaxed">
-                    {t('hero.sessions_completed', { count: sessions.length, stars: wallet?.total_stars || 0 })}
+                    {`${t('hero.sessions_completed_prefix')} ${sessions.length} ${t('hero.sessions_completed_middle')} ${wallet?.total_stars || 0} ${t('hero.sessions_completed_suffix')}`}
                     <br />
                     {t('hero.keep_learning')}
                   </p>
