@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -40,10 +41,6 @@ const Index = () => {
   const handleSignOut = async () => {
     await signOut();
     toast.success("Signed out successfully");
-  };
-
-  const handleLanguageChange = (languageCode: string) => {
-    setLanguage(languageCode);
   };
 
   const features = [
@@ -201,7 +198,7 @@ const Index = () => {
         <div className="container mx-auto px-4 py-8 space-y-12">
           {/* Language Selector Section */}
           <div className="max-w-md mx-auto">
-            <LanguageSelector onLanguageChange={handleLanguageChange} />
+            <LanguageSelector />
           </div>
 
           <div className="border-b border-purple-200/30 mb-8"></div>
