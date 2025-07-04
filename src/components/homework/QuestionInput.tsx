@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Camera, Send } from "lucide-react";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface QuestionInputProps {
   question: string;
@@ -15,6 +16,8 @@ interface QuestionInputProps {
 }
 
 const QuestionInput = ({ question, setQuestion, imageFile, setImageFile, onSubmit }: QuestionInputProps) => {
+  const { t } = useLanguage();
+  
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -35,13 +38,13 @@ const QuestionInput = ({ question, setQuestion, imageFile, setImageFile, onSubmi
     <Card className="p-6 border-0 shadow-lg bg-white/70 backdrop-blur-sm">
       <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
         <MessageSquare className="w-5 h-5 text-purple-600" />
-        Your Question
+        {t('homework.your_question')}
       </h2>
       
       <div className="space-y-4">
         <div className="flex gap-2">
           <Textarea
-            placeholder="Type your homework question here... (supports English, Afrikaans, Swahili, Yoruba, and more!)"
+            placeholder={t('homework.type_question')}
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             className="min-h-32 border-2 border-gray-200 focus:border-purple-400 rounded-xl flex-1"
@@ -67,10 +70,10 @@ const QuestionInput = ({ question, setQuestion, imageFile, setImageFile, onSubmi
             <div className="space-y-2">
               <Camera className="w-12 h-12 mx-auto text-purple-500" />
               <p className="text-gray-700 font-medium">
-                {imageFile ? `📷 ${imageFile.name}` : "Click to upload homework photo"}
+                {imageFile ? `📷 ${imageFile.name}` : t('homework.upload_photo')}
               </p>
               <p className="text-sm text-gray-500">
-                Supports handwritten and printed questions
+                {t('homework.supports_handwritten')}
               </p>
             </div>
           </label>

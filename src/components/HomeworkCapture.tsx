@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
 import QuestionInput from "./homework/QuestionInput";
 import AnswerTiers from "./homework/AnswerTiers";
 import GamificationLevel from "./homework/GamificationLevel";
@@ -26,6 +27,7 @@ interface AIResponse {
 
 const HomeworkCapture = ({ userBalance, onBalanceUpdate, onStarsEarned }: HomeworkCaptureProps) => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const { wallet, saveHomeworkSession, updateWalletBalance, addTransaction, sessions } = useUserData();
   const [question, setQuestion] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -37,9 +39,9 @@ const HomeworkCapture = ({ userBalance, onBalanceUpdate, onStarsEarned }: Homewo
   const userLevel = Math.floor((wallet?.total_stars || 0) / 50) + 1;
 
   const questionTiers = [
-    { id: "hint", name: "Quick Hint", price: 2.00 },
-    { id: "walkthrough", name: "Full Walkthrough", price: 5.00 },
-    { id: "practice", name: "Try It Yourself", price: 8.00 }
+    { id: "hint", name: t('homework.quick_hint'), price: 2.00 },
+    { id: "walkthrough", name: t('homework.full_walkthrough'), price: 5.00 },
+    { id: "practice", name: t('homework.try_yourself'), price: 8.00 }
   ];
 
   const handleQuestionSubmit = async (questionText: string, imageFile: File | null) => {
@@ -150,10 +152,10 @@ const HomeworkCapture = ({ userBalance, onBalanceUpdate, onStarsEarned }: Homewo
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">Ask Askie Anything!</h1>
-        <p className="text-gray-600">Snap a photo or type your homework question</p>
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">{t('homework.title')}</h1>
+        <p className="text-gray-600">{t('homework.subtitle')}</p>
         <Badge variant="outline" className="mt-2">
-          Balance: R{currentBalance.toFixed(2)}
+          {t('homework.balance')}: R{currentBalance.toFixed(2)}
         </Badge>
       </div>
 

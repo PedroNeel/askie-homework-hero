@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Zap, BookOpen, Star } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface AnswerTiersProps {
   currentBalance: number;
@@ -12,36 +13,41 @@ interface AnswerTiersProps {
 }
 
 const AnswerTiers = ({ currentBalance, onTierSelect, isProcessing, selectedTier }: AnswerTiersProps) => {
+  const { t } = useLanguage();
+  
   const questionTiers = [
     {
       id: "hint",
-      name: "Quick Hint",
+      name: t('homework.quick_hint'),
       price: 2.00,
       icon: Zap,
-      description: "Fast pointer in the right direction",
-      color: "bg-purple-100 text-purple-700"
+      description: t('homework.quick_hint_desc'),
+      color: "bg-purple-100 text-purple-700",
+      buttonText: t('homework.get_hint')
     },
     {
       id: "walkthrough",
-      name: "Full Walkthrough", 
+      name: t('homework.full_walkthrough'), 
       price: 5.00,
       icon: BookOpen,
-      description: "Complete step-by-step solution",
-      color: "bg-blue-100 text-blue-700"
+      description: t('homework.full_walkthrough_desc'),
+      color: "bg-blue-100 text-blue-700",
+      buttonText: t('homework.get_walkthrough')
     },
     {
       id: "practice",
-      name: "Try It Yourself",
+      name: t('homework.try_yourself'),
       price: 8.00,
       icon: Star,
-      description: "Solution + similar practice questions",
-      color: "bg-emerald-100 text-emerald-700"
+      description: t('homework.try_yourself_desc'),
+      color: "bg-emerald-100 text-emerald-700",
+      buttonText: t('homework.get_practice')
     }
   ];
 
   return (
     <Card className="p-6 border-0 shadow-lg bg-white/70 backdrop-blur-sm">
-      <h2 className="text-xl font-semibold mb-4">Choose Your Answer Level</h2>
+      <h2 className="text-xl font-semibold mb-4">{t('homework.choose_level')}</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {questionTiers.map((tier) => (
           <Card 
@@ -63,10 +69,10 @@ const AnswerTiers = ({ currentBalance, onTierSelect, isProcessing, selectedTier 
               {isProcessing && selectedTier === tier.id ? (
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Processing...
+                  {t('homework.processing')}
                 </div>
               ) : (
-                `Get ${tier.name}`
+                tier.buttonText
               )}
             </Button>
           </Card>
