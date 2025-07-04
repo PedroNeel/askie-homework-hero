@@ -8,7 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Eye, EyeOff, BookOpen, Brain, Users } from "lucide-react";
-import LanguageSelector from "./LanguageSelector";
 
 const AuthPage = () => {
   const [email, setEmail] = useState("");
@@ -70,10 +69,6 @@ const AuthPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-africa flex items-center justify-center p-4">
-      <div className="absolute top-4 right-4">
-        <LanguageSelector />
-      </div>
-      
       <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-8 items-center">
         {/* Left side - Hero content */}
         <div className="text-white space-y-6 text-center lg:text-left">

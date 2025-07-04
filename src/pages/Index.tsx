@@ -11,7 +11,7 @@ import PaymentWallet from "@/components/PaymentWallet";
 import FamilyDashboard from "@/components/FamilyDashboard";
 import AuthPage from "@/components/AuthPage";
 import { toast } from "sonner";
-import LanguageSelector from "@/components/LanguageSelector";
+import MiniLanguageTab from "@/components/MiniLanguageTab";
 
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -138,6 +138,7 @@ const Index = () => {
             </div>
 
             <div className="flex items-center gap-4">
+              <MiniLanguageTab />
               <Badge variant="secondary" className="gap-1 bg-emerald-100 text-emerald-700 border-emerald-200">
                 <Star className="w-4 h-4 text-emerald-600" />
                 {wallet?.total_stars || 0} {t('wallet.stars')}
@@ -195,13 +196,6 @@ const Index = () => {
       {/* Main Content */}
       <main className="pb-20 md:pb-8">
         <div className="container mx-auto px-4 py-8 space-y-12">
-          {/* Language Selector Section */}
-          <div className="max-w-md mx-auto">
-            <LanguageSelector />
-          </div>
-
-          <div className="border-b border-purple-200/30 mb-8"></div>
-
           {activeTab === "home" && (
             <>
               {/* Hero Section */}
